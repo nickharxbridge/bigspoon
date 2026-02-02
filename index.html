@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bigspoon</title>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="241dcfb9-b7d4-4110-826c-c4a99a2f84aa"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .overlay {
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            font-size: 4rem;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            padding: 2rem;
+        }
+        .session-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .session-form input {
+            padding: 0.75rem 1rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            width: 200px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .session-form button {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: #4a9eff;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .session-form button:hover {
+            background: #3a8eef;
+        }
+        .status {
+            color: white;
+            margin-top: 1rem;
+            opacity: 0.8;
+        }
+        .connected-users {
+            color: white;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .hidden {
+            display: none;
+        }
+        #leave-btn {
+            margin-top: 1rem;
+            background: #ff4a4a;
+        }
+        #leave-btn:hover {
+            background: #ef3a3a;
+        }
+        .commit-hash {
+            position: fixed;
+            top: 0.5rem;
+            left: 0.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+        .settings-container {
+            position: fixed;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+        .settings-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+        .settings-options.open {
+            max-height: 250px;
+            opacity: 1;
+        }
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transition: transform 0.3s ease;
+        }
+        .background-layer.flipped {
+            transform: scaleX(-1);
+        }
+        .settings-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .settings-toggle {
+            flex-shrink: 0;
+        }
+        .room-selector {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem;
+            max-width: 90vw;
+            overflow-x: auto;
+        }
+        .room-selector.hidden {
+            display: none;
+        }
+        .room-thumbnail {
+            width: 80px;
+            height: 60px;
+            border: 2px solid transparent;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            object-fit: cover;
+            transition: border-color 0.2s, transform 0.2s;
+            flex-shrink: 0;
+        }
+        .room-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        .room-thumbnail.selected {
+            border-color: #4a9eff;
+        }
+        .audio-settings {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem;
+            min-width: 250px;
+        }
+        .audio-settings.hidden {
+            display: none;
+        }
+        .audio-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .audio-slider-label {
+            color: white;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .audio-slider-label span {
+            opacity: 0.7;
+        }
+        .audio-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        .audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .audio-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .audio-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .feedback-link {
+            position: fixed;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .feedback-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .hint {
+            position: fixed;
+            top: 1rem;
+            right: 4rem;
+            color: white;
+            font-family: 'Segoe Script', 'Bradley Hand', cursive;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            text-align: right;
+            line-height: 1.4;
+        }
+        .hint.hidden {
+            opacity: 0;
+        }
+        .hint-arrow {
+            position: fixed;
+            top: 0.8rem;
+            right: 1rem;
+            color: white;
+            font-size: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            transform: rotate(-45deg);
+        }
+        .hint-arrow.hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-layer" id="background-layer"></div>
+    <div class="commit-hash" id="commit-hash">loading...</div>
+    <a href="mailto:harxbridge@gmail.com?subject=Bigspoon Feedback" class="feedback-link">Send Feedback</a>
+
+    <div class="hint" id="hint">Click the spoon and<br>then the bed to enter<br>a two person session</div>
+    <div class="hint-arrow" id="hint-arrow">&#8594;</div>
+
+    <div class="settings-container">
+        <button class="settings-btn settings-toggle" id="settings-toggle" title="Settings">&#129348;</button>
+        <div class="settings-options" id="settings-options">
+            <button class="settings-btn" id="setting-1" title="Session">&#128716;</button>
+            <button class="settings-btn" id="setting-2" title="Room">&#127968;</button>
+            <button class="settings-btn" id="setting-3" title="Audio">&#128266;</button>
+            <button class="settings-btn" id="setting-4" title="Switch Sides">&#8596;</button>
+        </div>
+    </div>
+
+    <div class="room-selector hidden" id="room-selector">
+        <!-- Room thumbnails loaded dynamically -->
+    </div>
+
+    <div class="audio-settings hidden" id="audio-settings">
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Rain
+                <span id="rain-volume-label">50%</span>
+            </label>
+            <input type="range" class="audio-slider" id="rain-volume" min="0" max="100" value="50">
+        </div>
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Speaker
+                <span id="speaker-volume-label">100%</span>
+            </label>
+            <input type="range" class="audio-slider" id="speaker-volume" min="0" max="100" value="100">
+        </div>
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Microphone
+                <span id="mic-volume-label">100%</span>
+            </label>
+            <input type="range" class="audio-slider" id="mic-volume" min="0" max="100" value="100">
+        </div>
+    </div>
+
+    <audio id="rain" loop>
+        <source src="Audio/rain.mp3" type="audio/mpeg">
+    </audio>
+    <div id="audio-container"></div>
+
+    <div class="overlay" id="overlay">
+        <div class="session-form hidden" id="join-form">
+            <input type="text" id="session-code" placeholder="Session Code" maxlength="6">
+            <br>
+            <button id="join-btn">Join Session</button>
+            <p class="status" id="status">Enter a session code to connect</p>
+        </div>
+
+        <div class="session-form hidden" id="session-info">
+            <p class="status">Connected to session: <strong id="current-session"></strong></p>
+            <p class="connected-users" id="user-count">0 other users</p>
+            <button id="leave-btn">Leave Session</button>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display commit hash
+        fetch('/commit-hash')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('commit-hash').textContent = data.hash;
+            })
+            .catch(() => {
+                document.getElementById('commit-hash').textContent = 'unknown';
+            });
+
+        // Hide hint after 5 seconds
+        setTimeout(() => {
+            document.getElementById('hint').classList.add('hidden');
+            document.getElementById('hint-arrow').classList.add('hidden');
+        }, 15000);
+
+        const socket = io();
+        const peers = {};
+        const dataChannels = {};
+        let localStream = null;
+
+        const rainAudio = document.getElementById('rain');
+        const joinForm = document.getElementById('join-form');
+        const sessionInfo = document.getElementById('session-info');
+        const sessionCodeInput = document.getElementById('session-code');
+        const joinBtn = document.getElementById('join-btn');
+        const leaveBtn = document.getElementById('leave-btn');
+        const status = document.getElementById('status');
+        const currentSession = document.getElementById('current-session');
+        const userCount = document.getElementById('user-count');
+        const audioContainer = document.getElementById('audio-container');
+        const settingsToggle = document.getElementById('settings-toggle');
+        const settingsOptions = document.getElementById('settings-options');
+        const sessionToggle = document.getElementById('setting-1');
+        const roomToggle = document.getElementById('setting-2');
+        const roomSelector = document.getElementById('room-selector');
+        const audioToggle = document.getElementById('setting-3');
+        const audioSettings = document.getElementById('audio-settings');
+        const rainVolumeSlider = document.getElementById('rain-volume');
+        const speakerVolumeSlider = document.getElementById('speaker-volume');
+        const micVolumeSlider = document.getElementById('mic-volume');
+        const rainVolumeLabel = document.getElementById('rain-volume-label');
+        const speakerVolumeLabel = document.getElementById('speaker-volume-label');
+        const micVolumeLabel = document.getElementById('mic-volume-label');
+        const flipToggle = document.getElementById('setting-4');
+        const backgroundLayer = document.getElementById('background-layer');
+
+        let sessionUIVisible = false;
+        let isFlipped = false;
+        let roomSelectorVisible = false;
+        let audioSettingsVisible = false;
+        let currentRoom = 'bedroom.jpg';
+        let micGainNode = null;
+        let audioContext = null;
+        let rainGainNode = null;
+        let rainAudioContext = null;
+
+        // Settings toggle
+        settingsToggle.addEventListener('click', () => {
+            settingsOptions.classList.toggle('open');
+            // Hide all UI when toggling settings
+            sessionUIVisible = false;
+            roomSelectorVisible = false;
+            audioSettingsVisible = false;
+            joinForm.classList.add('hidden');
+            sessionInfo.classList.add('hidden');
+            roomSelector.classList.add('hidden');
+            audioSettings.classList.add('hidden');
+        });
+
+        // Session toggle (bed button)
+        sessionToggle.addEventListener('click', () => {
+            sessionUIVisible = !sessionUIVisible;
+            // Hide other UIs when showing session UI
+            roomSelectorVisible = false;
+            audioSettingsVisible = false;
+            roomSelector.classList.add('hidden');
+            audioSettings.classList.add('hidden');
+
+            if (sessionUIVisible) {
+                // Show the appropriate UI based on connection state
+                if (localStream) {
+                    // Connected - show session info
+                    sessionInfo.classList.remove('hidden');
+                } else {
+                    // Not connected - show join form
+                    joinForm.classList.remove('hidden');
+                }
+            } else {
+                // Hide both
+                joinForm.classList.add('hidden');
+                sessionInfo.classList.add('hidden');
+            }
+        });
+
+        // Room toggle (house button)
+        roomToggle.addEventListener('click', () => {
+            roomSelectorVisible = !roomSelectorVisible;
+            // Hide other UIs when showing room selector
+            sessionUIVisible = false;
+            audioSettingsVisible = false;
+            joinForm.classList.add('hidden');
+            sessionInfo.classList.add('hidden');
+            audioSettings.classList.add('hidden');
+
+            if (roomSelectorVisible) {
+                roomSelector.classList.remove('hidden');
+            } else {
+                roomSelector.classList.add('hidden');
+            }
+        });
+
+        // Audio toggle (speaker button)
+        audioToggle.addEventListener('click', () => {
+            audioSettingsVisible = !audioSettingsVisible;
+            // Hide other UIs when showing audio settings
+            sessionUIVisible = false;
+            roomSelectorVisible = false;
+            joinForm.classList.add('hidden');
+            sessionInfo.classList.add('hidden');
+            roomSelector.classList.add('hidden');
+
+            if (audioSettingsVisible) {
+                audioSettings.classList.remove('hidden');
+            } else {
+                audioSettings.classList.add('hidden');
+            }
+        });
+
+        // Flip toggle (switch sides button)
+        flipToggle.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            backgroundLayer.classList.toggle('flipped', isFlipped);
+        });
+
+        // Rain volume control (using Web Audio API for iOS compatibility)
+        function initRainAudio() {
+            if (rainAudioContext) return;
+            rainAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = rainAudioContext.createMediaElementSource(rainAudio);
+            rainGainNode = rainAudioContext.createGain();
+            rainGainNode.gain.value = rainVolumeSlider.value / 100;
+            source.connect(rainGainNode);
+            rainGainNode.connect(rainAudioContext.destination);
+        }
+
+        rainVolumeSlider.addEventListener('input', () => {
+            const volume = rainVolumeSlider.value / 100;
+            if (rainGainNode) {
+                rainGainNode.gain.value = volume;
+            }
+            rainVolumeLabel.textContent = `${rainVolumeSlider.value}%`;
+        });
+
+        // Speaker volume control
+        speakerVolumeSlider.addEventListener('input', () => {
+            const volume = speakerVolumeSlider.value / 100;
+            // Update all peer audio elements
+            document.querySelectorAll('#audio-container audio').forEach(audio => {
+                audio.volume = volume;
+            });
+            speakerVolumeLabel.textContent = `${speakerVolumeSlider.value}%`;
+        });
+
+        // Mic volume control
+        micVolumeSlider.addEventListener('input', () => {
+            const volume = micVolumeSlider.value / 100;
+            if (micGainNode) {
+                micGainNode.gain.value = volume;
+            }
+            micVolumeLabel.textContent = `${micVolumeSlider.value}%`;
+        });
+
+        // Load room thumbnails dynamically
+        async function loadRooms() {
+            try {
+                const response = await fetch('/rooms');
+                const data = await response.json();
+                const rooms = data.rooms;
+
+                roomSelector.innerHTML = '';
+                rooms.forEach((room, index) => {
+                    const img = document.createElement('img');
+                    img.className = 'room-thumbnail' + (index === 0 ? ' selected' : '');
+                    img.src = `Images/Rooms/${room}`;
+                    img.dataset.room = room;
+                    img.alt = room.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+
+                    img.addEventListener('click', () => {
+                        // Update selected state
+                        document.querySelectorAll('.room-thumbnail').forEach(t => t.classList.remove('selected'));
+                        img.classList.add('selected');
+
+                        // Update current room
+                        currentRoom = img.dataset.room;
+
+                        // Update background
+                        updateBackground();
+                    });
+
+                    roomSelector.appendChild(img);
+                });
+
+                // Set initial room to first available
+                if (rooms.length > 0) {
+                    currentRoom = rooms[0];
+                    updateBackground();
+                }
+            } catch (err) {
+                console.error('Failed to load rooms:', err);
+            }
+        }
+
+        loadRooms();
+
+        function updateBackground() {
+            const count = Object.keys(peers).length;
+            const totalUsers = count + 1;
+            const overlayImage = totalUsers >= 2 ? 'Images/full.png' : 'Images/empty.png';
+            backgroundLayer.style.backgroundImage = `url('${overlayImage}'), url('Images/Rooms/${currentRoom}')`;
+        }
+
+        // Start rain audio on first interaction
+        document.body.addEventListener('click', function startAudio() {
+            initRainAudio();
+            rainAudio.play();
+        }, { once: true });
+
+        joinBtn.addEventListener('click', joinSession);
+        sessionCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinSession();
+        });
+        leaveBtn.addEventListener('click', leaveSession);
+
+        function setupDataChannel(dc, peerId) {
+            dataChannels[peerId] = dc;
+
+            dc.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    // Handle incoming data channel messages here if needed
+                } catch (e) {
+                    console.error('Error parsing message:', e);
+                }
+            };
+
+            dc.onclose = () => {
+                delete dataChannels[peerId];
+            };
+        }
+
+        async function joinSession() {
+            const code = sessionCodeInput.value.trim().toUpperCase();
+            if (!code) {
+                status.textContent = 'Please enter a session code';
+                return;
+            }
+
+            try {
+                const rawStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+                // Set up audio context for mic volume control
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(rawStream);
+                micGainNode = audioContext.createGain();
+                micGainNode.gain.value = micVolumeSlider.value / 100;
+                const destination = audioContext.createMediaStreamDestination();
+                source.connect(micGainNode);
+                micGainNode.connect(destination);
+
+                localStream = destination.stream;
+                socket.emit('join-session', code);
+
+                joinForm.classList.add('hidden');
+                if (sessionUIVisible) {
+                    sessionInfo.classList.remove('hidden');
+                }
+                currentSession.textContent = code;
+            } catch (err) {
+                status.textContent = 'Microphone access denied';
+                console.error('Error accessing microphone:', err);
+            }
+        }
+
+        function leaveSession() {
+            // Close all peer connections
+            Object.values(peers).forEach(pc => pc.close());
+            Object.keys(peers).forEach(id => delete peers[id]);
+
+            // Close all data channels
+            Object.values(dataChannels).forEach(dc => dc.close());
+            Object.keys(dataChannels).forEach(id => delete dataChannels[id]);
+
+            // Stop local stream
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            // Clean up audio context
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+                micGainNode = null;
+            }
+
+            // Clear audio elements
+            audioContainer.innerHTML = '';
+
+            // Disconnect and reconnect socket
+            socket.disconnect();
+            socket.connect();
+
+            sessionInfo.classList.add('hidden');
+            // Show join form if session UI is visible
+            if (sessionUIVisible) {
+                joinForm.classList.remove('hidden');
+            }
+            sessionCodeInput.value = '';
+            status.textContent = 'Enter a session code to connect';
+
+            // Reset background to empty
+            updateBackground();
+        }
+
+        function updateUserCount() {
+            const count = Object.keys(peers).length;
+            userCount.textContent = `${count} other user${count !== 1 ? 's' : ''}`;
+            updateBackground();
+        }
+
+        async function createPeerConnection(userId, isInitiator) {
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            });
+
+            peers[userId] = pc;
+
+            // Create data channel for chat (initiator creates, receiver listens)
+            if (isInitiator) {
+                const dc = pc.createDataChannel('chat');
+                setupDataChannel(dc, userId);
+            }
+
+            // Handle incoming data channels
+            pc.ondatachannel = (event) => {
+                setupDataChannel(event.channel, userId);
+            };
+
+            // Add local stream
+            localStream.getTracks().forEach(track => {
+                pc.addTrack(track, localStream);
+            });
+
+            // Handle incoming audio
+            pc.ontrack = (event) => {
+                const audio = document.createElement('audio');
+                audio.srcObject = event.streams[0];
+                audio.autoplay = true;
+                audio.id = `audio-${userId}`;
+                audio.volume = speakerVolumeSlider.value / 100;
+                audioContainer.appendChild(audio);
+            };
+
+            // Handle ICE candidates
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('ice-candidate', { to: userId, candidate: event.candidate });
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                    removePeer(userId);
+                }
+            };
+
+            if (isInitiator) {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                socket.emit('offer', { to: userId, offer });
+            }
+
+            updateUserCount();
+            return pc;
+        }
+
+        function removePeer(userId) {
+            if (peers[userId]) {
+                peers[userId].close();
+                delete peers[userId];
+            }
+            if (dataChannels[userId]) {
+                dataChannels[userId].close();
+                delete dataChannels[userId];
+            }
+            const audio = document.getElementById(`audio-${userId}`);
+            if (audio) audio.remove();
+            updateUserCount();
+        }
+
+        // Socket event handlers
+        socket.on('existing-users', async (users) => {
+            for (const userId of users) {
+                await createPeerConnection(userId, true);
+            }
+        });
+
+        socket.on('user-joined', async (userId) => {
+            await createPeerConnection(userId, false);
+        });
+
+        socket.on('offer', async ({ from, offer }) => {
+            let pc = peers[from];
+            if (!pc) {
+                pc = await createPeerConnection(from, false);
+            }
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            socket.emit('answer', { to: from, answer });
+        });
+
+        socket.on('answer', async ({ from, answer }) => {
+            const pc = peers[from];
+            if (pc) {
+                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            }
+        });
+
+        socket.on('ice-candidate', async ({ from, candidate }) => {
+            const pc = peers[from];
+            if (pc) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        socket.on('user-left', (userId) => {
+            removePeer(userId);
+        });
+
+        socket.on('session-full', () => {
+            status.textContent = 'Session is full (max 2 users)';
+            // Stop local stream since we couldn't join
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            if (sessionUIVisible) {
+                joinForm.classList.remove('hidden');
+            }
+            sessionInfo.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
