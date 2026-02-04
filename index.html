@@ -44,7 +44,7 @@
             border: none;
             border-radius: 0.5rem;
             margin-bottom: 1rem;
-            width: 200px;
+            width: 280px;
             text-align: center;
             text-transform: uppercase;
         }
@@ -343,16 +343,16 @@
 
     <div class="overlay" id="overlay">
         <div class="session-form hidden" id="join-form">
-            <input type="text" id="session-code" placeholder="Session Code" maxlength="6">
+            <input type="text" id="session-code" placeholder="Shared Phrase" maxlength="16">
             <br>
-            <button id="join-btn">Join Session</button>
-            <p class="status" id="status">Enter a session code to connect</p>
+            <button id="join-btn">Connect</button>
+            <p class="status" id="status">Enter your unique shared phrase to connect</p>
         </div>
 
         <div class="session-form hidden" id="session-info">
-            <p class="status">Connected to session: <strong id="current-session"></strong></p>
-            <p class="connected-users" id="user-count">0 other users</p>
-            <button id="leave-btn">Leave Session</button>
+            <p class="status">Connected with phrase: <strong id="current-session"></strong></p>
+            <p class="connected-users" id="user-count">0 bedfellows</p>
+            <button id="leave-btn">Leave</button>
         </div>
     </div>
 
@@ -611,7 +611,7 @@
         async function joinSession() {
             const code = sessionCodeInput.value.trim().toUpperCase();
             if (!code) {
-                status.textContent = 'Please enter a session code';
+                status.textContent = 'Please enter a shared phrase';
                 return;
             }
 
@@ -676,7 +676,7 @@
                 joinForm.classList.remove('hidden');
             }
             sessionCodeInput.value = '';
-            status.textContent = 'Enter a session code to connect';
+            status.textContent = 'Enter a shared phrase to connect';
 
             // Reset background to empty
             updateBackground();
@@ -684,7 +684,7 @@
 
         function updateUserCount() {
             const count = Object.keys(peers).length;
-            userCount.textContent = `${count} other user${count !== 1 ? 's' : ''}`;
+            userCount.textContent = `${count} bedfellow${count !== 1 ? 's' : ''}`;
             updateBackground();
         }
 
