@@ -1,8 +1,10 @@
+import { showHint } from './ui.js';
 const STORAGE_KEY = 'bigspoon-visited';
 export function initIntro(onEnter) {
     const overlay = document.getElementById('intro-overlay');
     if (localStorage.getItem(STORAGE_KEY)) {
         overlay.classList.add('hidden');
+        showHint();
         return;
     }
     const enterBtn = document.getElementById('intro-enter');
@@ -15,6 +17,7 @@ export function initIntro(onEnter) {
         overlay.classList.add('fade-out');
         overlay.addEventListener('animationend', () => {
             overlay.classList.add('hidden');
+            showHint();
             onEnter();
         }, { once: true });
     });

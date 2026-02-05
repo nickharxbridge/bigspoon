@@ -16,12 +16,18 @@ const audioSettings = document.getElementById('audio-settings')!;
 const flipToggle = document.getElementById('setting-4')!;
 const backgroundLayer = document.getElementById('background-layer')!;
 
-export function initUI(): void {
-    // Hide hint after 15 seconds
+export function showHint(): void {
+    const hint = document.getElementById('hint')!;
+    const hintArrow = document.getElementById('hint-arrow')!;
+    hint.classList.remove('hidden');
+    hintArrow.classList.remove('hidden');
     setTimeout(() => {
-        document.getElementById('hint')!.classList.add('hidden');
-        document.getElementById('hint-arrow')!.classList.add('hidden');
+        hint.classList.add('hidden');
+        hintArrow.classList.add('hidden');
     }, 15000);
+}
+
+export function initUI(): void {
 
     // Settings toggle
     settingsToggle.addEventListener('click', () => {
