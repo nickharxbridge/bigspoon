@@ -1,0 +1,374 @@
+/* ==========================================================================
+   Reset & Base
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   Layout & Overlay
+   ========================================================================== */
+
+.overlay {
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+h1 {
+    font-size: 4rem;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    padding: 2rem;
+}
+
+/* ==========================================================================
+   Session Form
+   ========================================================================== */
+
+.session-form {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+}
+
+.session-form input {
+    padding: 0.75rem 1rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    width: 280px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.session-form button {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #4a9eff;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.session-form button:hover {
+    background: #3a8eef;
+}
+
+/* ==========================================================================
+   Status & Utility
+   ========================================================================== */
+
+.status {
+    color: white;
+    margin-top: 1rem;
+    opacity: 0.8;
+}
+
+.connected-users {
+    color: white;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ==========================================================================
+   Leave Button
+   ========================================================================== */
+
+#leave-btn {
+    margin-top: 1rem;
+    background: #ff4a4a;
+}
+
+#leave-btn:hover {
+    background: #ef3a3a;
+}
+
+/* ==========================================================================
+   Commit Hash
+   ========================================================================== */
+
+.commit-hash {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+/* ==========================================================================
+   Settings Container & Buttons
+   ========================================================================== */
+
+.settings-container {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.settings-options.open {
+    max-height: 250px;
+    opacity: 1;
+}
+
+.settings-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.settings-toggle {
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Background & Flip Animation
+   ========================================================================== */
+
+.background-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    transition: transform 0.3s ease;
+}
+
+.background-layer.flipped {
+    transform: scaleX(-1);
+}
+
+/* ==========================================================================
+   Room Selector Gallery
+   ========================================================================== */
+
+.room-selector {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 0.5rem;
+    max-width: 90vw;
+    overflow-x: auto;
+}
+
+.room-selector.hidden {
+    display: none;
+}
+
+.room-thumbnail {
+    width: 80px;
+    height: 60px;
+    border: 2px solid transparent;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    object-fit: cover;
+    transition: border-color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+
+.room-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+.room-thumbnail.selected {
+    border-color: #4a9eff;
+}
+
+/* ==========================================================================
+   Audio Settings & Volume Sliders
+   ========================================================================== */
+
+.audio-settings {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 0.5rem;
+    min-width: 250px;
+}
+
+.audio-settings.hidden {
+    display: none;
+}
+
+.audio-slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.audio-slider-label {
+    color: white;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.audio-slider-label span {
+    opacity: 0.7;
+}
+
+.audio-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.audio-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #4a9eff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.audio-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.audio-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #4a9eff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* ==========================================================================
+   Feedback Link
+   ========================================================================== */
+
+.feedback-link {
+    position: fixed;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.feedback-link:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ==========================================================================
+   Hint Display & Arrow
+   ========================================================================== */
+
+.hint {
+    position: fixed;
+    top: 1rem;
+    right: 4rem;
+    color: white;
+    font-family: 'Segoe Script', 'Bradley Hand', cursive;
+    font-size: 1.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    text-align: right;
+    line-height: 1.4;
+}
+
+.hint.hidden {
+    opacity: 0;
+}
+
+.hint-arrow {
+    position: fixed;
+    top: 0.8rem;
+    right: 1rem;
+    color: white;
+    font-size: 2rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    transform: rotate(-45deg);
+}
+
+.hint-arrow.hidden {
+    opacity: 0;
+}

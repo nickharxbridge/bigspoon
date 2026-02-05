@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bigspoon</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="241dcfb9-b7d4-4110-826c-c4a99a2f84aa"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/js/main.js"></script>
+</head>
+<body>
+    <div class="background-layer" id="background-layer"></div>
+    <div class="commit-hash" id="commit-hash">loading...</div>
+    <a href="mailto:harxbridge@gmail.com?subject=Bigspoon Feedback" class="feedback-link">Send Feedback</a>
+
+    <div class="hint" id="hint">Click the spoon and<br>then the bed to enter<br>a two person session</div>
+    <div class="hint-arrow" id="hint-arrow">&#8594;</div>
+
+    <div class="settings-container">
+        <button class="settings-btn settings-toggle" id="settings-toggle" title="Settings">&#129348;</button>
+        <div class="settings-options" id="settings-options">
+            <button class="settings-btn" id="setting-1" title="Session">&#128716;</button>
+            <button class="settings-btn" id="setting-2" title="Room">&#127968;</button>
+            <button class="settings-btn" id="setting-3" title="Audio">&#128266;</button>
+            <button class="settings-btn" id="setting-4" title="Switch Sides">&#8596;</button>
+        </div>
+    </div>
+
+    <div class="room-selector hidden" id="room-selector"></div>
+
+    <div class="audio-settings hidden" id="audio-settings">
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Rain
+                <span id="rain-volume-label">50%</span>
+            </label>
+            <input type="range" class="audio-slider" id="rain-volume" min="0" max="100" value="50">
+        </div>
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Speaker
+                <span id="speaker-volume-label">100%</span>
+            </label>
+            <input type="range" class="audio-slider" id="speaker-volume" min="0" max="100" value="100">
+        </div>
+        <div class="audio-slider-group">
+            <label class="audio-slider-label">
+                Microphone
+                <span id="mic-volume-label">100%</span>
+            </label>
+            <input type="range" class="audio-slider" id="mic-volume" min="0" max="100" value="100">
+        </div>
+    </div>
+
+    <audio id="rain" loop>
+        <source src="assets/audio/rain.mp3" type="audio/mpeg">
+    </audio>
+    <div id="audio-container"></div>
+
+    <div class="overlay" id="overlay">
+        <div class="session-form hidden" id="join-form">
+            <input type="text" id="session-code" placeholder="Shared Phrase" maxlength="16">
+            <br>
+            <button id="join-btn">Connect</button>
+            <p class="status" id="status">Enter your unique shared phrase to connect</p>
+        </div>
+
+        <div class="session-form hidden" id="session-info">
+            <p class="status">Connected with phrase: <strong id="current-session"></strong></p>
+            <p class="connected-users" id="user-count">0 bedfellows</p>
+            <button id="leave-btn">Leave</button>
+        </div>
+    </div>
+</body>
+</html>

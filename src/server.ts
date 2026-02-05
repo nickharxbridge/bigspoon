@@ -37,7 +37,7 @@ app.get('/commit-hash', (_req: Request, res: Response) => {
 });
 
 app.get('/rooms', (_req: Request, res: Response) => {
-    const roomsDir = path.join(__dirname, '..', 'Images', 'Rooms');
+    const roomsDir = path.join(__dirname, '..', 'public', 'assets', 'images', 'rooms');
     try {
         const files = fs.readdirSync(roomsDir);
         const imageFiles = files.filter(file =>
@@ -49,7 +49,7 @@ app.get('/rooms', (_req: Request, res: Response) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const sessions: Sessions = {};
 

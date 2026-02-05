@@ -4,7 +4,7 @@
   "description": "Big Spoon Web - Voice chat with ambient rain sounds",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.client.json",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts"
   },

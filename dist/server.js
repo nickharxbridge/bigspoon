@@ -7,18 +7,47 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const child_process_1 = require("child_process");
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server);
-app.use(express_1.default.static(path_1.default.join(__dirname, '..')));
+function getCommitHash() {
+    try {
+        return (0, child_process_1.execSync)('git rev-parse --short HEAD').toString().trim();
+    }
+    catch {
+        return 'unknown';
+    }
+}
+app.get('/commit-hash', (_req, res) => {
+    res.json({ hash: getCommitHash() });
+});
+app.get('/rooms', (_req, res) => {
+    const roomsDir = path_1.default.join(__dirname, '..', 'public', 'assets', 'images', 'rooms');
+    try {
+        const files = fs_1.default.readdirSync(roomsDir);
+        const imageFiles = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file));
+        res.json({ rooms: imageFiles });
+    }
+    catch {
+        res.json({ rooms: [] });
+    }
+});
+app.use(express_1.default.static(path_1.default.join(__dirname, '..', 'public')));
 const sessions = {};
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
     socket.on('join-session', (sessionCode) => {
-        socket.join(sessionCode);
         if (!sessions[sessionCode]) {
             sessions[sessionCode] = [];
         }
+        // Limit sessions to 2 users
+        if (sessions[sessionCode].length >= 2) {
+            socket.emit('session-full');
+            return;
+        }
+        socket.join(sessionCode);
         sessions[sessionCode].push(socket.id);
         // Notify others in the session
         socket.to(sessionCode).emit('user-joined', socket.id);
