@@ -372,3 +372,171 @@ h1 {
 .hint-arrow.hidden {
     opacity: 0;
 }
+
+/* ==========================================================================
+   Intro Overlay
+   ========================================================================== */
+
+.intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    animation: intro-fade-in 0.8s ease both;
+}
+
+.intro-overlay.fade-out {
+    animation: intro-fade-out 0.6s ease forwards;
+}
+
+.intro-overlay.hidden {
+    display: none;
+}
+
+@keyframes intro-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes intro-fade-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+.intro-card {
+    background: rgba(62, 48, 40, 0.45);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 235, 210, 0.15);
+    border-radius: 1.25rem;
+    padding: 3rem 2.5rem;
+    max-width: 420px;
+    width: 90vw;
+    text-align: center;
+    animation: intro-card-in 0.8s ease 0.2s both;
+}
+
+@keyframes intro-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.intro-brand {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: #f5e6d3;
+    margin: 0 0 0.25rem;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.intro-tagline {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: rgba(245, 230, 211, 0.85);
+    margin-bottom: 1.5rem;
+}
+
+.intro-description {
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: rgba(245, 230, 211, 0.7);
+    margin-bottom: 2rem;
+}
+
+.intro-cta {
+    display: block;
+    width: 100%;
+    padding: 0.85rem 0;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    color: #f5e6d3;
+    background: rgba(180, 130, 90, 0.4);
+    border: 1px solid rgba(245, 230, 211, 0.2);
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s;
+}
+
+.intro-cta:hover {
+    background: rgba(180, 130, 90, 0.6);
+    border-color: rgba(245, 230, 211, 0.35);
+}
+
+.intro-notify-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 0.82rem;
+    color: rgba(245, 230, 211, 0.5);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.intro-notify-link:hover {
+    color: rgba(245, 230, 211, 0.75);
+}
+
+.intro-email-form {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    animation: intro-fade-in 0.4s ease both;
+}
+
+.intro-email-form.hidden {
+    display: none;
+}
+
+.intro-email-input {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-size: 0.85rem;
+    color: #f5e6d3;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(245, 230, 211, 0.2);
+    border-radius: 0.4rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.intro-email-input::placeholder {
+    color: rgba(245, 230, 211, 0.35);
+}
+
+.intro-email-input:focus {
+    border-color: rgba(245, 230, 211, 0.4);
+}
+
+.intro-email-submit {
+    padding: 0.6rem 1rem;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-size: 0.85rem;
+    color: #f5e6d3;
+    background: rgba(180, 130, 90, 0.4);
+    border: 1px solid rgba(245, 230, 211, 0.2);
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: background 0.25s;
+}
+
+.intro-email-submit:hover {
+    background: rgba(180, 130, 90, 0.6);
+}
