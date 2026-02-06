@@ -1,22 +1,30 @@
 import { showHint } from './ui.js';
 
-const STORAGE_KEY = 'bigspoon-visited';
+const STORAGE_KEY = 'bigspoon-visit-count';
+const MAX_INTRO_VIEWS = 3;
 
 function trackVisit(): void {
     fetch('/api/visit', { method: 'POST' }).catch(() => {});
 }
 
+function getVisitCount(): number {
+    return parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+}
+
 export function initIntro(onEnter: () => void): void {
     const overlay = document.getElementById('intro-overlay')!;
+    const visitCount = getVisitCount();
 
-    if (localStorage.getItem(STORAGE_KEY)) {
+    if (visitCount >= MAX_INTRO_VIEWS) {
         overlay.classList.add('hidden');
         showHint();
         return;
     }
 
-    // Track first-time visitor
-    trackVisit();
+    // Track first-time visitor to Supabase
+    if (visitCount === 0) {
+        trackVisit();
+    }
 
     const enterBtn = document.getElementById('intro-enter')!;
     const notifyLink = document.getElementById('intro-notify-link')!;
@@ -25,7 +33,7 @@ export function initIntro(onEnter: () => void): void {
     const emailSubmit = document.getElementById('intro-email-submit') as HTMLButtonElement;
 
     enterBtn.addEventListener('click', () => {
-        localStorage.setItem(STORAGE_KEY, '1');
+        localStorage.setItem(STORAGE_KEY, String(visitCount + 1));
         overlay.classList.add('fade-out');
         overlay.addEventListener('animationend', () => {
             overlay.classList.add('hidden');
