@@ -9,6 +9,7 @@
     "dev": "ts-node src/server.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "express": "^4.18.2",
     "socket.io": "^4.7.2"
   },
