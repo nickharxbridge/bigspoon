@@ -149,13 +149,17 @@ h1 {
 }
 
 .settings-options.open {
-    max-height: 250px;
+    max-height: 320px;
     opacity: 1;
 }
 
 .settings-btn {
     width: 68px;
     height: 68px;
+    min-width: 68px;
+    min-height: 68px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
     border: none;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
